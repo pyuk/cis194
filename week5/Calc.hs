@@ -1,7 +1,10 @@
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 module Calc where
 
 import ExprT
 import Parser
+import qualified StackVM as S
+import qualified Data.Map as M
 
 --exercise 1
 
@@ -79,5 +82,51 @@ testSat     = testExp :: Maybe Mod7
 
 --exercise 5
 
-instance Expr Program where
-   lit x = [PushI x]
+{-instance Expr S.Program where
+   lit x = [S.PushI x]
+   add ([S.PushI x]) ([S.PushI y]) = [S.PushI (x + y)]
+   mul ([S.PushI x]) ([S.PushI y]) = [S.PushI (x * y)]-}
+
+instance Expr S.Program where
+  lit x = [S.PushI x]
+  add x y = x ++ y ++ [S.Add]
+  mul x y = x ++ y ++ [S.Mul]
+
+compile :: String -> Maybe S.Program
+compile xs = parseExp lit add mul xs
+
+--exercise 6
+
+class HasVars a where
+    var :: String -> a
+
+data VarExprT = VarLit Integer
+              | VarAdd VarExprT VarExprT
+              | VarMul VarExprT VarExprT
+              | Var String
+    deriving (Show, Eq)
+
+instance Expr VarExprT where
+    lit x = VarLit x
+    add x y = VarAdd x y
+    mul x y = VarMul x y
+
+instance HasVars VarExprT where
+    var x = Var x
+
+instance HasVars (M.Map String Integer -> Maybe Integer) where
+    var x = M.lookup x
+
+instance Expr (M.Map String Integer -> Maybe Integer) where
+    lit x = \_ -> Just x
+    add x y = \z -> if (x z) /= Nothing && (y z) /= Nothing 
+                        then (x z) + (y z) 
+                        else Nothing
+    mul x y = \z -> if (x z) /= Nothing && (y z) /= Nothing 
+                        then (x z) * (y z) 
+                        else Nothing
+
+withVars :: [(String, Integer)] 
+         -> (M.Map String Integer -> Maybe Integer) 
+         -> Maybe Integer
+withVars vs exp = exp $ M.fromList vs
