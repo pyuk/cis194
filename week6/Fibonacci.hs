@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# OPTIONS -Wall #-}
 module Fibonacci where
 
 --exercise 1
