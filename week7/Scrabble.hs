@@ -1,12 +1,13 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Scrabble where
 
 --exercise 3
 
 newtype Score = Score Int
-    deriving (Show)
+    deriving (Show,Num)
 
-instance Num Score where
-    (+) (Score a) (Score b) = Score (a + b)
+--instance Num Score where
+--    (+) (Score a) (Score b) = Score (a + b)
 
 instance Monoid Score where
     mempty = Score 0
