@@ -20,14 +20,25 @@ moreFun e@(GL _ x) e2@(GL _ y)
 
 --exercise 2
 
-treeFold :: (a -> b -> b) -> Tree a -> b
-treeFold f (Node { rootLabel = a, subForest = (x:xs) }) = 
-    a `f` (treeFold f (Node { rootLabel = (rootLabel x), subForest = xs }))
+treeFold :: (a -> [b] -> b) -> Tree a -> b
+--treeFold f (Node { rootLabel = a, subForest = [] }) = f a []
+treeFold f (Node { rootLabel = a, subForest = xs }) = 
+    a `f` map (treeFold f) xs
 
 --exercise 3
 
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
-nextLevel e g =
-    (mconcat . map findFun $ g, mconcat . map findFun . map addBoss $ g)
+nextLevel e g = (mconcat . map findFun $ g, mconcat . map findFun . map addBoss $ g)
     where findFun (a,b) = moreFun a b
           addBoss (a,b) = (glCons e a,glCons e b)
+
+--exercise 4
+
+maxFun :: Tree Employee -> GuestList
+maxFun = findFun . treeFold nextLevel
+    where findFun (a,b) = moreFun a b
+
+--exercise 5
+
+main :: IO ()
+main = readFile "company.txt" >>= putStrLn . show . maxFun . read
