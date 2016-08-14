@@ -32,13 +32,22 @@ nextLevel e g = (mconcat . map findFun $ g, mconcat . map findFun . map addBoss 
     where findFun (a,b) = moreFun a b
           addBoss (a,b) = (glCons e a,glCons e b)
 
+nextLevel' :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
+nextLevel' e [] = (glCons e mempty, mempty)
+nextLevel' e g = (boss g, noBoss g)
+    where boss = glCons e . mconcat . map snd
+          noBoss = mconcat . map fst
+
 --exercise 4
 
 maxFun :: Tree Employee -> GuestList
-maxFun = findFun . treeFold nextLevel
+maxFun = findFun . treeFold nextLevel'
     where findFun (a,b) = moreFun a b
 
 --exercise 5
 
+formatGL :: GuestList -> String
+formatGL (GL xs n) = unlines $ ("Total fun: " ++ show n) : map empName xs
+
 main :: IO ()
-main = readFile "company.txt" >>= putStrLn . show . maxFun . read
+main = readFile "company.txt" >>= putStrLn . formatGL . maxFun . read
