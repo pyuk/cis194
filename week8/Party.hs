@@ -50,4 +50,4 @@ formatGL :: GuestList -> String
 formatGL (GL xs n) = unlines $ ("Total fun: " ++ show n) : map empName xs
 
 main :: IO ()
-main = readFile "company.txt" >>= putStrLn . formatGL . maxFun . read
+main = readFile "company.txt" >>= putStrLn . formatGL . maxFun . readb
