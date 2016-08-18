@@ -69,10 +69,34 @@ instance Functor Parser where
 --exercise 2
 
 instance Applicative Parser where
-  pure a = Parser (\s -> Just (a,s))
+  pure a = Parser (\(_:s) -> Just (a,s))
   (Parser f) <*> (Parser g) = Parser h
     where h s = case f s of
             Nothing     -> Nothing
             Just (a,as) -> fmap (first a) $ g as
 
 --exercise 3
+
+abParser :: Parser (Char,Char)
+abParser = (,) <$> char 'a' <*> char 'b'
+
+abParser_ :: Parser ()
+abParser_ = const () <$> abParser
+
+intPair :: Parser [Integer]
+intPair = (\a _ c -> [a,c]) <$> posInt <*> pure " " <*> posInt
+
+--exercise 4
+
+instance Alternative Parser where
+  empty = Parser (\_ -> Nothing)
+  p1 <|> p2 = Parser f
+    where f s = runParser p1 s <|> runParser p2 s
+
+--exercise 5
+
+uppercase :: Parser (Char)
+uppercase = satisfy (\a -> a `elem` "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+intOrUppercase :: Parser ()
+intOrUppercase = const () <$> posInt <|> const () <$> uppercase
