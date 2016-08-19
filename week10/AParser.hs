@@ -69,11 +69,11 @@ instance Functor Parser where
 --exercise 2
 
 instance Applicative Parser where
-  pure a = Parser (\(_:s) -> Just (a,s))
+  pure a = Parser $ \(_:s) -> Just (a,s)
   (Parser f) <*> (Parser g) = Parser h
     where h s = case f s of
-            Nothing     -> Nothing
-            Just (a,as) -> fmap (first a) $ g as
+                  Nothing     -> Nothing
+                  Just (a,as) -> fmap (first a) $ g as
 
 --exercise 3
 
