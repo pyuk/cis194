@@ -23,7 +23,7 @@ oneOrMore p = (:) <$> p <*> zeroOrMore p
 ------------------------------------------------------------
 
 spaces :: Parser String
-spaces = zeroOrMore (satisfy isSpace)
+spaces = oneOrMore (satisfy isSpace)
 
 ident :: Parser String
 ident = (:) <$> satisfy isAlpha <*> zeroOrMore (satisfy isAlphaNum)
@@ -46,5 +46,15 @@ data SExpr = A Atom
            | Comb [SExpr]
   deriving Show
 
---parseSExpr :: Parser SExpr
---parseSExpr = 
+atomParse :: Parser Atom
+atomParse = N <$> posInt <|> I <$> ident
+
+findPar :: Parser [Char]
+findPar = oneOrMore (char '(' <|> char ')')
+
+rmSpacePar :: Parser [String]
+rmSpacePar = zeroOrMore (findPar <|> spaces)
+
+parseSExpr :: Parser SExpr
+parseSExpr = Comb <$> oneOrMore (A <$> (rmSpacePar *> atomParse <* rmSpacePar))
+
