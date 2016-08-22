@@ -68,7 +68,7 @@ takeJ n (Append _ l r)
     | otherwise       = l +++ takeJ (n - findSize l) r
 
 --exercise 3
-WINDOWS
+
 scoreLine :: String -> JoinList Score String
 scoreLine xs = Single (scoreString xs) xs
 
