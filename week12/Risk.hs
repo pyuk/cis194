@@ -4,6 +4,7 @@ module Risk where
 
 import Control.Monad.Random
 import Data.List
+import Control.Monad
 
 ------------------------------------------------------------
 -- Die values
@@ -28,42 +29,25 @@ type Army = Int
 
 data Battlefield = Battlefield { attackers :: Army, defenders :: Army }
   deriving Show
+
 --exercise 2
 
-aBattle :: Army -> Army -> DieValue -> DieValue -> DieValue -> DieValue -> DieValue -> (Int,Int)
-aBattle x y a1 a2 a3 d1 d2 =
-  case zipWith compare (reverse . sort $ [a1,a2,a3]) (reverse . sort $ [d1,d2]) of
-    [LT,LT] -> (x - 2,y)
-    [LT,GT] -> (x-1,y-1)
-    [GT,LT] -> (x-1,y-1)
-    [GT,GT] -> (x,y - 2)
-    [EQ,EQ] -> (x - 2,y)
-    [EQ,LT] -> (x - 2,y)
-    [EQ,GT] -> (x-1,y-1)
-    [LT,EQ] -> (x - 2,y)
-    [GT,EQ] -> (x-1,y-1)
-
 battle :: Battlefield -> Rand StdGen Battlefield
-battle (Battlefield x 1) =
-  die >>= \a1 -> die >>= \a2 ->
-  die >>= \a3 -> die >>= \d ->
-  return $ Battlefield
-  (fst $ aBattle x 1 a1 a2 a3 d 0)
-  (snd $ aBattle x 1 a1 a2 a3 d 0)
-battle (Battlefield 2 y) =
-  die >>= \a -> die >>= \d1 ->
-  die >>= \d2 -> return $ Battlefield
-  (fst $ aBattle 2 y a 0 0 d1 d2)
-  (snd $ aBattle 2 y a 0 0 d2 d2)
-battle (Battlefield 3 y) =
-  die >>= \a1 -> die >>= \a2 ->
-  die >>= \d1 -> die >>= \d2 ->
-  return $ Battlefield
-  (fst $ aBattle 3 y a1 a2 0 d1 d2)
-  (snd $ aBattle 3 y a1 a2 0 d1 d2)
-battle (Battlefield x y) =
-  die >>= \a1 -> die >>= \a2 ->
-  die >>= \a3 -> die >>= \d1 ->
-  die >>= \d2 -> return $ Battlefield
-  (fst $ aBattle x y a1 a2 a3 d1 d2)
-  (snd $ aBattle x y a1 a2 a3 d1 d2)
+battle bf@(Battlefield x y)
+  | x <= 1 || y <= 0 = return bf
+  | otherwise = return $ findBattle (return $ replicateM x die) (return $ replicateM y die)
+  where findBattle xs ys = battle' (reverse  . sort $ xs) (reverse . sort $ ys)
+        battle' (a:c:as) (b:d:bs) =
+          case compare a b of
+            GT -> case compare c d of
+                    GT -> Battlefield x (y-2)
+                    LT -> Battlefield (x-1) (y-1)
+                    EQ -> Battlefield (x-1) (y-1)
+            LT -> case compare c d of
+                    GT -> Battlefield (x-1) (y-1)
+                    LT -> Battlefield (x-2) y
+                    EQ -> Battlefield (x-2) y
+            EQ -> case compare c d of
+                    GT -> Battlefield (x-1) (y-1)
+                    LT -> Battlefield (x-2) y
+                    EQ -> Battlefield (x-2) y
