@@ -35,7 +35,7 @@ data Battlefield = Battlefield { attackers :: Army, defenders :: Army }
 battle :: Battlefield -> Rand StdGen Battlefield
 battle bf@(Battlefield x y)
   | x <= 1 || y <= 0 = return bf
-  | otherwise = return $ findBattle (return $ replicateM x die) (return $ replicateM y die)
+  | otherwise = findBattle <$> (replicateM x die) <*> (replicateM y die)
   where findBattle xs ys = battle' (reverse  . sort $ xs) (reverse . sort $ ys)
         battle' (a:c:as) (b:d:bs) =
           case compare a b of
