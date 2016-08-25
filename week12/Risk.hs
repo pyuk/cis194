@@ -35,19 +35,32 @@ data Battlefield = Battlefield { attackers :: Army, defenders :: Army }
 battle :: Battlefield -> Rand StdGen Battlefield
 battle bf@(Battlefield x y)
   | x <= 1 || y <= 0 = return bf
-  | otherwise = findBattle <$> (replicateM x die) <*> (replicateM y die)
-  where findBattle xs ys = battle' (reverse  . sort $ xs) (reverse . sort $ ys)
-        battle' (a:c:as) (b:d:bs) =
-          case compare a b of
-            GT -> case compare c d of
-                    GT -> Battlefield x (y-2)
-                    LT -> Battlefield (x-1) (y-1)
-                    EQ -> Battlefield (x-1) (y-1)
-            LT -> case compare c d of
-                    GT -> Battlefield (x-1) (y-1)
-                    LT -> Battlefield (x-2) y
-                    EQ -> Battlefield (x-2) y
-            EQ -> case compare c d of
-                    GT -> Battlefield (x-1) (y-1)
-                    LT -> Battlefield (x-2) y
-                    EQ -> Battlefield (x-2) y
+  | otherwise = findBattle <$>
+                replicateM (min 3 $ x - 1) die <*>
+                replicateM (min 2 y) die
+  where findBattle xs ys = battle' x y (reverse . sort $ xs) (reverse . sort $ ys)
+        battle' x y [] _ = Battlefield x y
+        battle' x y _ [] = Battlefield x y
+        battle' x y (a:as) (b:bs)
+          | a > b     = battle' x (y - 1) as bs
+          | otherwise = battle' (x - 1) y as bs
+
+--exercise 3
+
+invade :: Battlefield -> Rand StdGen Battlefield
+invade bf@(Battlefield x y)
+  | x < 2 || y == 0 = return bf
+  | otherwise       = battle bf >>= invade
+
+--exercise 4
+
+successProb :: Battlefield -> Rand StdGen Double
+successProb = let getBattles = replicateM 1000 . invade
+                  findProb = (/1000) . fromIntegral . length
+                  applyFilter = filter $ (==0) . defenders
+              in  fmap (findProb . applyFilter) . getBattles
+
+--exercise 5
+
+exactSuccessProb :: Battlefield -> Double
+exactSuccessProb bf = 
