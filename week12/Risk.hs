@@ -63,4 +63,7 @@ successProb = let getBattles = replicateM 1000 . invade
 --exercise 5
 
 exactSuccessProb :: Battlefield -> Double
-exactSuccessProb bf = 
+exactSuccessProb (Battlefield x y)
+  | x <= 1 = 0
+  | y <= 0 = 1
+  | otherwise = 
