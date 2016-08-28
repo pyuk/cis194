@@ -66,12 +66,12 @@ exactSuccessProb :: Battlefield -> Double
 exactSuccessProb (Battlefield x y)
   | x <= 0           = 0
   | y <= 0           = 1
-  | x == 1 && y == 1 = (15/36) * defLost1 
-  | x == 2 && y == 1 = (125/216) * defLost1 + (91/216) * atLost1
-  | x == 1           = (55/216) * defLost1
-  | x == 2           = (295/1296) * defLost2 + (420/1296) * lost1
-  | y == 1           = (855/1296) * defLost1 + (441/1296) * atLost1
-  | otherwise = (2890/7776) * defLost2 + (2275/7776) * atLost2 + (2611/7776) * lost1
+  | x == 1 && y == 1 = (15/36)     * defLost1 
+  | x == 2 && y == 1 = (125/216)   * defLost1 + (91/216)    * atLost1
+  | x == 1           = (55/216)    * defLost1
+  | x == 2           = (295/1296)  * defLost2 + (420/1296)  * lost1
+  | y == 1           = (855/1296)  * defLost1 + (441/1296)  * atLost1
+  | otherwise        = (2890/7776) * defLost2 + (2275/7776) * atLost2 + (2611/7776) * lost1
   where defLost1 = exactSuccessProb (Battlefield x (y-1))
         atLost1  = exactSuccessProb (Battlefield (x-1) y)
         defLost2 = exactSuccessProb (Battlefield x (y-2))
