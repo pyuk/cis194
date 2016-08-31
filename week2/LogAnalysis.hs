@@ -11,7 +11,7 @@ parseHelp = read . (!! 1) . words
 parseHelp' :: String -> String
 parseHelp' = unwords . drop 2 . words
 
-parseMessage:: String -> LogMessage
+parseMessage :: String -> LogMessage
 parseMessage message@('I':_) = LogMessage Info (parseHelp message) (parseHelp' message)
 parseMessage message@('W':_) = LogMessage Warning  (parseHelp message) (parseHelp' message)
 parseMessage message@('E':m) = LogMessage (Error $ parseHelp message) (parseHelp m) (parseHelp' m)
